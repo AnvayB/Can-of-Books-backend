@@ -8,6 +8,7 @@ const jwksClient = require('jwks-rsa');
 const mongoose = require('mongoose');
 const mongooseOptions = {useNewUrlParser: true, useUnifiedTopology: true };
 mongoose.connect('mongodb://localhost:27017/cats-database', mongooseOptions);
+const User = require('./User.js');
 
 
 const app = express();
@@ -21,16 +22,15 @@ const client = jwksClient({
 });
 
 function getKey(header, callback){
-  client.getSigningKey(header.kid, function(err, key) {
+  client.getSigningKey(header.kid, function(key) {
     var signingKey = key.publicKey || key.rsaPublicKey;
     callback(null, signingKey);
   });
 }
 
 app.get('/auth-test', (request, response) => {
-  // response.send('worked');
-  const token = request.headers.authorization.split(' ')[1];
-  jwt.verify(token.getKey, {}, function(error, user) {
+  const token = request.headers.authorization.split('')[1];
+  jwt.verify(token, getKey, {}, function(error) {
     if (error) {
       response.send('Token Invalid. This route is inaccessible');
     } else {
@@ -39,6 +39,24 @@ app.get('/auth-test', (request, response) => {
   }
 )});
 
+const trial = new User({
+  email: 'blank@trial.com',
+  books: [{
+    name: 'Book Title',
+    description: 'Book Summary',
+    status: 'How much of book has been read?'
+  }]
+})
+trial.save();
+
+app.get('/books', getUserBooks);
+
+function getUserBooks (request, response) {
+  User.find({}).then(userBooks => {
+    console.log(userBooks);
+    response.json(userBooks);
+  })
+};
 
 
   // TODO: 
