@@ -39,6 +39,7 @@ app.get('/auth-test', (request, response) => {
   }
 )});
 
+// seeding into the database
 const trial = new User({
   email: 'blank@trial.com',
   books: [{
