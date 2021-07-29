@@ -48,6 +48,7 @@ const trial = new User({
     status: 'How much of book has been read?'
   }]
 })
+console.log(trial);
 trial.save();
 
 app.get('/books', getUserBooks);
@@ -59,6 +60,21 @@ function getUserBooks (request, response) {
   })
 };
 
+app.post('/books', (request, response) => {
+  console.log('hello')
+  let newUserBook = new User(request.body);
+  newUserBook.save().then(book => {
+      response.json(book);
+    })
+  }
+)
+
+app.delete('/books/:id', (request, response) => {
+  let id = request.params.id;
+  User.findByIdAndDelete(id).then(() => 
+  response.json({ msg: 'Book Removed' })).catch(error => 
+    console.error(error));
+});
 
   // TODO: 
   // STEP 1: get the jwt from the headers
